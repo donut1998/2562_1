@@ -98,7 +98,7 @@
         <!-- Page Content  -->
         <div id="content">
             <div class="container">
-                <form class="form-inline" action="/action_page.php">
+                <!-- <form class="form-inline" action="#">
                     <label>Select: &nbsp;&nbsp;</label>
                     <select size="1" id="wgtmsr">
                         <option>แสดงการติดตามทั้งหมด</option>
@@ -107,41 +107,85 @@
                     <label>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Date:&nbsp;&nbsp; </label>
                     <input type="date" name="bday">
                     <button type="submit">Submit</button>
+                </form> -->
+                <form name="myForm" action="#" onsubmit="return initMap()" method="post">
+                    Name: <input type="text" name="fname">
+                    <input type="submit" value="Submit">
                 </form>
             </div>
             <br>
             <div id="map">
                 <script type="text/javascript">
-                    // Initialize and add the map
                     function initMap() {
                         // The location of TH
-                        var TH = {
-                            lat: 20,
-                            lng: 100
-                        };
-                        $.getJSON("https://miningproject-36b73.firebaseio.com/api.json", function(json) {
+                        var x6 = document.forms["myForm"]["fname"].value;
+                        //document.write(typeof x6);
+                        var items = [];
+                        $.getJSON("https://miningproject-36b73.firebaseio.com/api.json?fbclid=IwAR3gZUR_uhp6amov6UyepHadLGV_plG2i5tAiBtd1T15aHziPLnnhE8fG0k", function(json) {
+                            
+                            //document.write(x6);
+                            
+                            for (x in json) {
+                                // var x1 = (json[x].pos_logs["2019"]["09"]["22"]);
+                                var top = x6;
+                                var x1 = (json[x].pos_logs["2019"]["09"]["22"]);
+                                document.write(x1);
+                                for (x2 in x1) {
+                                    var pos_lat = x1[x2].lat;
+                                    var pos_long = x1[x2].long;
+                                    items.push([pos_lat, pos_long]);
+                                }
+                            }
+
+                            var TH = {
+                                lat: items[items.length - 1][0],
+                                lng: items[items.length - 1][1]
+                            };
+
                             var map = new google.maps.Map(
                                 document.getElementById('map'), {
-                                    zoom: 6,
+                                    zoom: 15,
                                     center: TH
-                                });
-                            var current_latitude = json.truck_1.last_pos.lat;
-                            var current_longtitude = json.truck_1.last_pos.long;
+                            });
 
-                            var truck1 = {
-                                lat: current_latitude,
-                                lng: current_longtitude
+                            var poly = [];
+                            var bounds = new google.maps.LatLngBounds();
+                            for (i = 0; i < items.length; i++) {
+                                var coords = new google.maps.LatLng(items[i][0], items[i][1])
+                                poly.push(coords);
+                                bounds.extend(coords);
+                            }
+
+                            // var poly = [
+                            //   {lat: 18.793098, lng: 98.954033},
+                            //   {lat: 18.93596, lng: 98.95503},
+                            //   {lat: 18.94596, lng: 98.96503},
+                            //   {lat: 18.94596, lng: 98.98503},
+                            //   {lat: 18.94596, lng: 99.0503},
+                            // ];
+
+                            var truck1_path = new google.maps.Polyline({
+                                path: poly,
+                                geodesic: true,
+                                strokeColor: '#FF0000',
+                                strokeOpacity: 1.0,
+                                strokeWeight: 3
+                            });
+                            truck1_path.setMap(map);
+                            var last_pos_truck1 = {
+                                lat: items[items.length - 1][0],
+                                lng: items[items.length - 1][1]
                             };
-                            var marker1 = new google.maps.Marker({
-                                position: truck1,
+                            var marker_truck1 = new google.maps.Marker({
+                                position: last_pos_truck1,
                                 map: map
-                            }); //mark
+                            });
                         });
                     }
                 </script>
             </div>
         </div>
-        
+
     </div>
 
     <!-- Popper.JS -->
